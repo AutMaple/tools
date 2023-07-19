@@ -1,0 +1,23 @@
+func To{{.TargetName}} (s *{{.SrcName}}) *{{.TargetName}} {
+  return &{{.TargetName}}{
+{{- range $field, $type := .TargetFields}}
+  {{- if $srcType := index $.SrcFields $field}}
+    {{- if eq $type $srcType}}
+    {{$field}}: s.{{$field}},
+    {{- end -}}
+  {{- end -}}
+{{- end}}
+  }
+}
+
+func To{{.SrcName}} (s *{{.TargetName}}) *{{.SrcName}} {
+  return &{{.SrcName}}{
+{{- range $field, $type := .SrcFields}}
+  {{- if $targetType := index $.TargetFields $field}}
+    {{- if eq $type $targetType}}
+    {{$field}}: s.{{$field}},
+    {{- end -}}
+  {{- end -}}
+{{- end}}
+  }
+}

@@ -1,0 +1,11 @@
+package {{.packageName}}
+
+import(
+    "time"
+)
+
+type {{.StructName}} struct {
+{{- range $name, $type := .Fields}}
+  {{snakeToPascalCase $name}} {{$type}}
+{{- end}}
+}

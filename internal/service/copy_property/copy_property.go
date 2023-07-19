@@ -1,11 +1,38 @@
 package copy_property
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"strings"
 	"text/template"
+	"tools/internal/utils/request"
 )
 
-func CopyProperty(daoStr, dtoStr string) string {
+type CopyForm struct {
+	Struct CopyStruct
+}
+
+type CopyStruct struct {
+	DaoStr string `json:"dao"`
+	DtoStr string `json:"dto"`
+}
+
+func Copy(c *gin.Context) {
+	var form CopyForm
+	err := request.BindParams(&form, c)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	res, err := CopyProperty(form.Struct.DaoStr, form.Struct.DtoStr)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+	c.String(200, res)
+}
+
+func CopyProperty(daoStr, dtoStr string) (string, error) {
 	dtoWords := strings.Fields(dtoStr)
 	srcName := dtoWords[1]
 	TargetFields := ArrayToMap(dtoWords[4 : len(dtoWords)-1])
@@ -23,8 +50,11 @@ func CopyProperty(daoStr, dtoStr string) string {
 		"SrcFields":    SrcFields,
 	}
 	var builder strings.Builder
-	t.Execute(&builder, data)
-	return builder.String()
+	err = t.Execute(&builder, data)
+	if err != nil {
+		return "", errors.WithStack(err)
+	}
+	return builder.String(), nil
 }
 
 func ArrayToMap(arr []string) map[string]string {
